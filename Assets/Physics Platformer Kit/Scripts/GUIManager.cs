@@ -27,6 +27,6 @@ public class GUIManager : MonoBehaviour
 		if(health)
 			GUILayout.Label ("Health: " + health.currentHealth);
 		if(coinsInLevel > 0)
-			GUILayout.Label ("Cubes: " + coinsCollected + " / " + coinsInLevel);
+			GUILayout.Label ("Cubes: " + coinsCollected + " / " + coinsInLevel /2 );
 	}
 }
