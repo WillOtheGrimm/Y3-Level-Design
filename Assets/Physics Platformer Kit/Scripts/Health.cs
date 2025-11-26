@@ -1,23 +1,29 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Events;
 
 //attach to any object in the game which takes damage (player, enemies, breakable crates, smashable windows..)
 [RequireComponent(typeof(AudioSource))]
-public class Health : MonoBehaviour 
+public class Health : MonoBehaviour, IResettable
 {
-	public AudioClip impactSound;					//play when object imacts with something else
+	public Transform Transform => transform;
+    public bool ResetTransform => resetTransform;
+
+    public AudioClip impactSound;					//play when object imacts with something else
 	public AudioClip hurtSound;						//play when this object recieves damage
 	public AudioClip deadSound;						//play when this object dies
 	public int currentHealth = 1;					//health of the object
 	public bool takeImpactDmg;						//does this object take damage from impacts?
 	public bool onlyRigidbodyImpact;				//if yes to the above, does it only take impact damage from other rigidbodies?
 	public bool respawn;							//should this object respawn when killed?
+	public bool resetTransform = true;
 	public string[] impactFilterTag;				//if we take impact damage, don't take impact damage from these objects (tags)
 	public float hitFlashDelay = 0.1f;				//how long each flash lasts (smaller number = more rapid flashing)
 	public float flashDuration = 0.9f;				//how long flash lasts (object is invulnerable to damage during this time)
 	public Color hitFlashColor = Color.red;			//color object should flash when it takes damage
 	public Transform flashObject;					//object to flash upon receiving damage (ie: a child mesh). If left blank it defaults to this object.
-	public GameObject[] spawnOnDeath;				//objects to spawn upon death of this object (ie: a particle effect or a coin)
+	public GameObject[] spawnOnDeath;               //objects to spawn upon death of this object (ie: a particle effect or a coin)
+	public UnityEvent respawned;
 	
 	[HideInInspector]
 	public bool dead, flashing;
@@ -109,9 +115,11 @@ public class Health : MonoBehaviour
 			transform.position = respawnPos;
 			dead = false;
 			currentHealth = defHealth;
+
+			respawned.Invoke();
 		}
-		else
-			Destroy (gameObject);
+		else if (resetTransform) gameObject.SetActive(false);
+		else Destroy (gameObject);
 		
 		if (spawnOnDeath.Length != 0)
 			foreach(GameObject obj in spawnOnDeath)
@@ -145,6 +153,12 @@ public class Health : MonoBehaviour
 		currentHealth -= hitForce;
 		//print (transform.name + " took: " + hitForce + " dmg in collision with " + col.transform.name);
 	}
+
+	public void ResetSelf()
+    {
+		gameObject.SetActive(true);
+        currentHealth = defHealth;
+    }
 }
 
 // NOTE: if you just want an object to play impact sounds, give it this script, but uncheck for impact damage

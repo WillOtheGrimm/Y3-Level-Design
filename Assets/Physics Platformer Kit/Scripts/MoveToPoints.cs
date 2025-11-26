@@ -5,9 +5,12 @@ using System.Collections.Generic;
 //moves object along a series of waypoints, useful for moving platforms or hazards
 //this class adds a kinematic rigidbody so the moving object will push other rigidbodies whilst moving
 [RequireComponent(typeof(Rigidbody))]
-public class MoveToPoints : MonoBehaviour 
+public class MoveToPoints : MonoBehaviour, IResettable
 {
-	public float speed;										//how fast to move
+	public Transform Transform => transform;
+    public bool ResetTransform => true;
+
+    public float speed;										//how fast to move
 	public float delay;										//how long to wait at each waypoint
 	public type movementType;								//stop at final waypoint, loop through waypoints or move back n forth along waypoints
 	
@@ -137,6 +140,14 @@ public class MoveToPoints : MonoBehaviour
 				Gizmos.DrawSphere(child.position, .7f);
 		}
 	}
+
+	public void ResetSelf()
+	{
+        currentWp = 0;
+		arrivalTime = 0f;
+		forward = true;
+        arrived = false;
+    }
 }
 
 /* NOTE: remember to tag object as "Moving Platform" if you want the player to be able to stand and move on it
